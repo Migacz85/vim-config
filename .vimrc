@@ -5,11 +5,13 @@
           " For youcompletme run this in directory
   "  ~/.vim/plugged/youcompletme/./install.py --clang-completer
   "  Run after :PlugInstall in vim and you should be ready to go.
-  " For Ultisnip:
+  " For Ultisnip to work:
   " mkdir -p ~/.vim/ftdetect/
   " ln -s ~/.vim/plugged/ultisnips ~/.vim/ftdetect/
+  " For persisten undo create empty undo directory:
+  " mkdir ~/.vim/undo
 " PLUGINS
-  call plug#begin('~/.vim/plugged')
+ call plug#begin('~/.vim/plugged')
   " Fugtive
     Plug 'https://github.com/tpope/vim-fugitive.git'
     Plug 'https://github.com/tpope/vim-repeat.git'
@@ -17,9 +19,10 @@
     Plug 'https://github.com/tpope/vim-unimpaired.git'
     Plug 'https://github.com/tpope/vim-surround.git'
     Plug 'https://github.com/tpope/vim-commentary.git'  
+    Plug 'https://github.com/tpope/vim-dispatch.git'
   " Django
     Plug 'python-mode/python-mode', { 'branch': 'develop' }
-    Plug 'JarrodCTaylor/vim-python-test-runner'
+    Plug 'janko-m/vim-test'
     Plug 'https://github.com/plytophogy/vim-virtualenv.git'
   " File managers
     Plug 'https://github.com/scrooloose/nerdtree.git'
@@ -63,11 +66,11 @@
 " CUSTOM FUNCTIONS
   " 
   fun! Browseoldfiles()
-  bd
+  bn
   vnew  +setl\ buftype=nofile | 0put =v:oldfiles | nnoremap <buffer> <cr> :e <c-r>=getline('.')<cr><cr> 
-  se ro
   normal gg
-  setlocal nobuflisted
+  setlocal nobuflisted 
+  wincmd L 
   endf
 " BINDINGS
     let mapleader = "\<space>"
@@ -84,17 +87,18 @@
     nnoremap <leader>fW :w! <cr>
     nnoremap <leader>fWa :wa! <cr>
     nnoremap <leader>fq :q! <cr> 
-    nnoremap <leader>fqa :qa! <cr> 
-    nnoremap <leader>fq :q <cr> 
+    nnoremap <leader>fQ :qa! <cr> 
     nnoremap <leader>fb :0,$d <bar> 0 r !js-beautify -s 2 -m 1 %
     nnoremap <leader>fp :PymodeLintAuto<cr>
     nnoremap <leader>fn :vnew <cr>
     nnoremap <leader>fnv :split new <cr>
-    nnoremap <leader>ffv <cr>  :cd ~/.vim/ <bar>:e ~/.vim/.vimrc <cr>
+    nnoremap <leader>ffv <cr>:cd ~/.vim/ <bar>:e ~/.vim/.vimrc <cr>
     nnoremap <leader>ffb :e	~/.bash_profile <cr>
 " PLUGGINS BINDINGS
   " Which key
-  
+    " Dont setup this parameter bellow 200 because 
+    " shourtchats like 'gcap' will not work correctly
+    set timeoutlen=300
     function UnmapPluginsBindings()
     if ! empty(maparg('<leader>b', 'n')) 
     unmap <leader>b
@@ -102,22 +106,35 @@
     if ! empty(maparg('<leader>d', 'n')) 
     unmap <leader>d
     endif
-    endf set timeoutlen=0
+    if ! empty(maparg('<leader>t', 'n')) 
+    unmap <leader>t
+    endif
+    endf 
     nnoremap <silent> <leader> :call UnmapPluginsBindings() <bar> :WhichKey '<Space>'<CR>
     let g:which_key_map =  {}
     let g:which_key_map.f = { 'name' : '+file' }
     let g:which_key_map.f.f = { 'name' : 'file paths' }
-    let g:which_key_map.f.Q = { 'name' : 'quit' }
-    let g:which_key_map.h = { 'name' : '+hunk' }
     let g:which_key_map.g = { 'name' : '+git' }
     let g:which_key_map.w = { 'name' : 'window' }
     let g:which_key_map.s = { 'name' : 'session' }
     let g:which_key_map.y = { 'name' : 'ycm' }
+
     let g:which_key_map.d= {
       \ 'name' : '+Django' ,
-      \ 'c' : ['DjangoTestClass'        , 'test class']        ,
-      \ 'a' : ['DjangoTestApp'        , 'test app']        ,
+      \ 'c' : ['DjangoTestClass'     , 'test class']        ,
+      \ 'a' : ['DjangoTestApp'       , 'test app']         ,
       \ }
+  
+   let g:which_key_map.h= {
+     \ 'name' : '+hunk' ,
+     \ '.' : ['GitGutterNextHunk'   , 'Next Hunk']         ,
+     \ ',' : ['GitGutterPrevHunk'    , 'Prev Hunk']        ,
+     \ }
+
+" Gutter 
+ "   nnoremap ]h :GitGutterNextHunk<cr>
+ "   nnoremap [h :GitGutterPrevHunk<cr>
+
     let g:which_key_map.b= {
     \ 'name' : '+buffer' ,
     \ 'b' : ['<Plug>(CommandTBuffer)'        , 'Command-t' ]        ,
@@ -132,11 +149,20 @@
     \ 'p' : ['bprevious' , 'previous-buffer'] ,
     \ '?' : ['Buffers'   , 'fzf-buffer']      ,
     \ }
+
+    let g:which_key_map.t= {
+    \ 'name' : '+tests' ,
+    \ 'n' : ['TestNearest'      , '(Nearest) In a test file runs the test nearest to the cursor']     ,
+    \ 'f' : ['TestFile'         , '(File) In a test file runs all tests in the current file']         ,
+    \ 'a' : ['TestSuite'        , '(All) Runs the whole test suite']                                  ,
+    \ 'l' : ['TestLast'         , '(Last) Runs the last test']                                        ,
+    \ 'v' : ['TestVisit'        , '(Visits) the test file from which you last run your tests']        ,
+    \ }
+
     autocmd! User vim-which-key call which#register('<Space>', 'g:which_key_map')
     call which_key#register('<Space>', "g:which_key_map")
     " nnoremap <silent> <leader> :<c-u>WhichKey '<Space>'<CR>
     " vnoremap <silent> <leader> :<c-u>WhichKeyVisual '<Space>'<CR>
-    
   " Command-t
     " nmap <silent> <Leader>t <Plug>(CommandT)
     " nmap <silent> <Leader>b <Plug>(CommandTBuffer)
@@ -152,16 +178,7 @@
     nnoremap <leader>gl :Glog<CR>
     nnoremap <leader>gc :Gcommit -m ""
     nnoremap <leader>gp :Gpush<CR>
-  " Django
-    nnoremap <Leader>de :cclose<cr>
-    nnoremap <Leader>dc :DjangoTestClass<CR>
-    nnoremap <Leader>dm :DjangoTestMethod<CR>
-    nnoremap <Leader>do :copen <bar> :wincmd L <CR>
-    nnoremap <Leader>da :DjangoTestApp<CR><bar> :cclose <cr> <bar> :copen <cr> <bar> :wincmd L <CR>
-    nnoremap <Leader>df :DjangoTestFile<CR><bar> :cclose <cr>
-  " Gutter 
-    nmap ]h <Plug>GitGutterNextHunk
-    nmap [h  <Plug>GitGutterPrevHunk
+
   " Nerdtree
     map <leader>fN  :NERDTreeFocus<cr>R<c-w>h<c-p>
     map <leader>fn :NERDTreeToggle<cr>
@@ -177,6 +194,12 @@
   " Undotree
     nnoremap <leader>u :UndotreeToggle<cr>
 "PLUGGINS SETTINGS
+
+  " Vim-test 
+    " make test commands execute using dispatch.vim
+    let test#strategy = "vimterminal" 
+    let g:test#preserve_screen = 1
+
   " Scratch
     let g:secratch_persistence_file = '.scratch.vim'
     let g:scratch_no_mappings = 1
@@ -194,7 +217,7 @@
           " Disable default key
     let g:ranger_map_keys = 0
   " Fugitive
-          " clean buffers from fugitive
+    " clean buffers from fugitive
     autocmd bufreadpost fugitive://* set bufhidden=delete
   " Gutter 
     set updatetime=100
@@ -202,7 +225,7 @@
     set laststatus=2
   " Python mode
     " Autopep on save
-    au BufWriteCmd *.py write || :PymodeLintAuto
+    " au BufWriteCmd *.py write || :PymodeLintAuto
     " au BufWriteCmd *.py write || :PymodeLint
     let g:pymode_breakpoint = 0
     let g:pymode_breakpoint_bind = '<leader>pb'
@@ -216,8 +239,20 @@
     let g:ycm_auto_trigger = 1
     " let g:ycm_key_invoke_completion = '<C-Space>'
 " VIM SETTINGS
- " Tabs
+  " Tabstops
     set tabstop=8 softtabstop=0 expandtab shiftwidth=2 smarttab
+  " Folds
+  "
+   " set viewoptions-=options
+   " autocmd BufWrite *.* mkview 
+   " autocmd BufWrite .* mkview 
+   " autocmd BufReadPost *.* view
+   " autocmd BufReadPost .* view 
+
+    " If git gutter will be turn on save it will write folds that are not 
+      " corresponding to indent method
+    nmap <F2> :GitGutterFold <cr>
+
   " Search
     " When selecting a parenthesis it will highlight the one matching:
     set showmatch
@@ -241,11 +276,14 @@
     set number " line number
   " Colors/Appearance 
     syntax on
-    colorscheme wal
+    colorscheme 1989
     set background=light
+    " pop up menu colors
     highlight Pmenu ctermbg=gray 
     highlight statusline ctermfg=yellow 
+
   " Persistent undo
+  " be sure to create the 'undo' directory first
     if has('persistent_undo')    "check if your vim version supports it
     set undofile                 "turn on the feature  
     set undodir=$HOME/.vim/undo  "directory where the undo files will be stored
