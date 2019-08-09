@@ -159,6 +159,7 @@
      \ '.' : ['GitGutterNextHunk'               , 'Next Hunk']             ,
      \ ',' : ['GitGutterPrevHunk'               , 'Prev Hunk']             ,
      \ }
+
     let g:which_key_map.b= {
     \ 'name' : '+buffer' ,
     \ 'b' : ['<Plug>(CommandTMRU)'        , 'Command-t' ]        ,
@@ -192,12 +193,26 @@
     " nmap <silent> <Leader>j <Plug>(CommandTJump)
     
   " Git mappings
+  "
+    let g:which_key_map.g= {
+    \ 'name' : '+buffer'        ,
+    \ 'gx' : ['!svn ls'         , '[svn] check link from github' ]                   ,
+    \ 'gX' : ['!svn export'     , '[svn] download file from github link']            ,
+    \ 'gm' : ['MerginalToggle'  , 'Branch manager']                                  ,
+    \ 'go' : ['Gbrowse'         , 'Open current file in github']                             ,
+    \ 'gi' : [':e .gitignore'   , 'Open .gitignore file in current repo']                              ,
+    \ 'gA' : ['Git add .'       , 'Stage all files to commit']                               ,
+    \ 'ga' : ['Git add %'       , 'Stage current file to commit']                               ,
+    \ 'gS' : [''            , 'Stage all files, name commit and make push']                               ,
+    \ 'p' : ['bprevious'        , 'previous-buffer']                           ,
+    \ }
+    
     nnoremap <leader>gx :!svn ls 
     nnoremap <leader>gX :!svn export 
     nnoremap <leader>gm :MerginalToggle<CR>
     nnoremap <leader>go :Gbrowse<CR>
     nnoremap <leader>gi :e .gitignore<CR>
-    nnoremap <leader>gS :Git add .<cr><bar>:Gcommit -m ""
+    nnoremap <leader>gS :Git add .<cr><bar>:Gcommit -m ""<bar>:Gpush
     nnoremap <leader>ga :Git add %<CR><CR>
     nnoremap <leader>gA :Git add .<CR><CR>
     " Reset current file to the moment from last commit
@@ -216,6 +231,7 @@
     nnoremap <leader>gl :Git log --oneline<CR>
     nnoremap <leader>gc :Gcommit -m ""
     nnoremap <leader>gp :Gpush<CR>
+
   " Ycm	
     nnoremap <leader>yi :YcmCompleter GoToDefinitionElseDeclaration<CR>
     nnoremap <leader>yh :YcmCompleter GetDoc <cr>
@@ -232,7 +248,6 @@
   " Vim-test 
     " make test commands execute using dispatch.vim
     let test#strategy = "dispatch" 
-
   " NerdTree
     let NERDTreeShowHidden=1
   " Ultisnips
@@ -280,7 +295,6 @@
 
   " Custom movements for copy and pastin directly in to {[("'
     " ' one " double
-    
     nnoremap pO ?'<cr>di'"0P <cr>
     nnoremap po /'<cr>di'"0P <cr>
     nnoremap pD ?"<cr>di""0P <cr>
@@ -349,7 +363,6 @@
     set undodir=$HOME/.vim/undo  "directory where the undo files will be stored
     endif     
   " Windows
-
     let g:suckless_tabline = 0
     let g:suckless_guitablabel = 0
 

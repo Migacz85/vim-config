@@ -1,5 +1,6 @@
 #  Vim custom distribution
 
+
 # Automated tests
 
 For checking if vim is working is working as expected. There are few 
