@@ -20,82 +20,30 @@ Expect (result):
   /* Hello */
   /* World */
 
-" Given (Test System clipboard is working):
-" ================
-"   Hello
-" Do (modification):
-" ------------------
-" * copy line
-"   cP 
-" * paste line
-"   cv
-" Expect (result):
-" ~~~~~~~~~~~~~~~~
-"   Hello
-" Expect (result):
-" ~~~~~~~~~~~~~~~~
-
-Given (Nerd is openinng file correctly):
+Given (Test System clipboard is working):
 ================
   Hello
-Do (In nerd opne read.test):
+
+Do (modification):
 ------------------
-* Open nerd file find file read.test 
-  :NERDTree ~/.vim/
-  /read2.test\<Enter>Enter
+* copy line
+  cP 
+* paste line
+  cv
 Expect (result):
 ~~~~~~~~~~~~~~~~
-  This is a read test
-
-Given (Stress test):
-================
   Hello
-Do (Open 10 times file using nerdtree and check value):
+
+
+Execute (In nerd open read.test):
 ------------------
 * Open nerd file find file read.test 
-  :set noswapfile \<Enter>
+  " :set noswapfile \<Enter>
   :NERDTree ~/.vim/
-  /read2.test\<Enter>Enter
-   fq
-   fn
-  :NERDTree ~/.vim/
-  /read2.test\<Enter>Enter
-   fq
-   fn
-  :NERDTree ~/.vim/
-  /read2.test\<Enter>Enter
-   fq
-   fn
-  :NERDTree ~/.vim/
-  /read2.test\<Enter>Enter
-   fq
-   fn
-  :NERDTree ~/.vim/
-  /read2.test\<Enter>Enter
-   fq
-   fn
-  :NERDTree ~/.vim/
-  /read2.test\<Enter>Enter
-   fq
-   fn
-  :NERDTree ~/.vim/
-  /read2.test\<Enter>Enter
-   fq
-   fn
-  :NERDTree ~/.vim/
-  /read2.test\<Enter>Enter
-   fq
-   fn
-  :NERDTree ~/.vim/
-  /read2.test\<Enter>Enter
-   fq
-   fn
-  :NERDTree ~/.vim/
-  /read2.test\<Enter>Enter
-   fq
-   fn
-
+  :/read2.test
+  :normal Enter
 Expect (result):
 ~~~~~~~~~~~~~~~~
-  Thi  is a read test
+  test
+
 
