@@ -26,6 +26,17 @@
     Plug 'https://github.com/907th/vim-auto-save.git'
   " Git 
     Plug 'https://github.com/idanarye/vim-merginal.git'
+    Plug 'https://github.com/mxw/vim-jsx.git'
+  " Javascript
+    " Plug 'benjie/local-npm-bin.vim'
+    Plug 'https://github.com/pangloss/vim-javascript.git'
+    Plug 'https://github.com/mxw/vim-jsx.git'
+    Plug 'https://github.com/Valloric/MatchTagAlways.git'
+  " Plug 'scrooloose/syntastic'
+    Plug 'mtscout6/syntastic-local-eslint.vim'
+    Plug 'https://github.com/justinmk/vim-dirvish.git'
+    Plug 'ludovicchabant/vim-gutentags'
+
   " Django
     Plug 'python-mode/python-mode', { 'branch': 'develop' }
   " Tests 
@@ -33,21 +44,23 @@
     Plug 'janko-m/vim-test'
  
   " " File managers
+    Plug 'https://github.com/junegunn/fzf.vim.git'
     Plug 'https://github.com/scrooloose/nerdtree.git'
-    " Buggy: 
-    " Plug 'https://github.com/Xuyuanp/nerdtree-git-plugin.git'
     Plug 'francoiscabrol/ranger.vim' 
     Plug 'rstacruz/sparkup', {'rtp': '.vim/'}
     Plug 'git://git.wincent.com/command-t.git' 
   
   " Tools
+    Plug 'nathanaelkane/vim-indent-guides'
+    Plug 'mhinz/vim-startify'
     " On-demand lazy load
     " Plug 'mtth/scratch.vim'
-   Plug 'liuchengxu/vim-which-key'
+    Plug 'liuchengxu/vim-which-key'
     Plug 'airblade/vim-gitgutter'
-    Plug 'Lokaltog/powerline', {'rtp': 'powerline/bindings/vim/'}
+    " Plug 'Lokaltog/powerline', {'rtp': 'powerline/bindings/vim/'}
+    Plug 'vim-airline/vim-airline'
     Plug 'https://github.com/Valloric/YouCompleteMe.git'
-    Plug 'https://github.com/mbbill/undotree'
+    " Plug 'https://github.com/mbbill/undotree'
     Plug 'christoomey/vim-system-copy'
     Plug 'christoomey/vim-quicklink'
     " Plug 'https://github.com/yuratomo/w3m.vim.git'
@@ -67,22 +80,53 @@
     Plug 'https://github.com/Glench/Vim-Jinja2-Syntax.git'
     Plug 'https://github.com/lepture/vim-jinja'
     Plug 'flazz/vim-colorschemes'
+    Plug 'sainnhe/vim-color-forest-night'
   
-  " " Snipamte/Emmet
-  "   Plug 'https://github.com/SirVer/ultisnips.git'
-  "   Plug 'https://github.com/honza/vim-snippets'
-  "   Plug 'https://github.com/mattn/emmet-vim.git'
+  " Snipamte/Emmet
+    Plug 'https://github.com/SirVer/ultisnips.git'
+    Plug 'https://github.com/honza/vim-snippets'
+    Plug 'https://github.com/mattn/emmet-vim.git'
 
   call plug#end()
+
 " CUSTOM FUNCTIONS
+
+  fun! SpawnTerminal()
+    :silent !{ urxvt -cd "%:p:h" & }
+  endf
+
+  fun! LiveServer()
+    :silent !{ urxvt -cd "%:p:h" -e live-server & }
+  endf
+
+  fun! ReactServer()
+    :silent !{ urxvt -cd "%:p:h" -e yarn develop & }
+  endf
+
+
   fun! Browseoldfiles()
-  bn
-  vnew  +setl\ buftype=nofile | 0put =v:oldfiles | nnoremap <buffer> <cr> :e <c-r>=getline('.')<cr><cr> 
+  vnew +setl\ buftype=nofile | 0put =v:oldfiles | nnoremap <buffer> <cr> :e <c-r>=getline('.')<cr><cr> 
   normal gg
   setlocal nobuflisted 
   wincmd L 
   endf
+  
 " BINDINGS
+  " Spawn terminal
+    let g:which_key_map =  {}
+
+    let g:which_key_map.k= {
+     \ 'name' : '+konsole' ,
+     \ 'k' : [':call SpawnTerminal()'            , 'Open new terminal here']                           ,
+     \ 'l' : [':call LiveServer() '              , 'Run live-server']                                  ,
+     \ 'y' : [':call ReactServer()'              , 'Run yarn server']                                  ,
+     \ }
+
+    
+    " nnoremap <leader>kt :call SpawnTerminal() <cr>
+    " nnoremap <leader>kl :call LiveServer() <cr>
+    " nnoremap <leader>kr :call ReactServer() <cr>
+
     let mapleader = "\<space>"
   " Themes
     nnoremap <leader>cl :colorscheme lightning <cr>
@@ -110,28 +154,35 @@
     nnoremap <leader>vw :wa! <cr> 
     nnoremap <leader>fb :0,$d <bar> 0 r !js-beautify -s 2 -m 1 %
     nnoremap <leader>fp :PymodeLintAuto<cr>
-    nnoremap <leader>fe :vnew <bar> wincmd L <cr>
+    nnoremap <leader>fn :vnew <bar> wincmd L <cr>
     nnoremap <leader>fE :new <cr>
     
     nnoremap <leader>fv :e ~/.vim/.vimrc <cr>
-" PLUGGINS BINDINGS
+" PLUGGINS BINDING:
+  " Fuzzy
+
+    " Command for git grep
+    " - fzf#vim#grep(command, with_column, [options], [fullscreen])
+    
+    command! -bang -nargs=* GGrep
+      \ call fzf#vim#grep(
+      \   'git grep --line-number '.shellescape(<q-args>), 0,
+      \   fzf#vim#with_preview({ 'dir': systemlist('git rev-parse --show-toplevel')[0] }), <bang>0)
+
+    " Override Colors command. You can safely do this in your .vimrc as fzf.vim
+    " will not override existing commands.
+    command! -bang Colors
+      \ call fzf#vim#colors({'left': '15%', 'options': '--reverse --margin 30%,0'}, <bang>0)
+
+    " Likewise, Files command with preview window
+    command! -bang -nargs=? -complete=dir Files
+      \ call fzf#vim#files(<q-args>, fzf#vim#with_preview(), <bang>0)
+
   " Which key
     " Dont setup this parameter bellow 500 because 
     " shourtchats like 'gcap' will not work correctly
     " or cP for copy to system clipboard 
       set timeoutlen=500
-
-      let g:suckless_mappings = {
-      \        '<M-[sdf]>'      :   'SetTilingMode("[sdf]")'    ,
-      \        '<M-[hjkl]>'     :    'SelectWindow("[hjkl]")'   ,
-      \        '<M-[HJKL]>'     :      'MoveWindow("[hjkl]")'   ,
-      \      '<C-M-[hjkl]>'     :    'ResizeWindow("[hjkl]")'   ,
-      \        '<M-[Oo]>'       :    'CreateWindow("[sv]")'     ,
-      \        '<M-q>'          :     'CloseWindow()'           ,
-      \   '<Leader>[123456789]' :       'SelectTab([123456789])',
-      \  '<Leader>t[123456789]' : 'MoveWindowToTab([123456789])',
-      \  '<Leader>T[123456789]' : 'CopyWindowToTab([123456789])',
-      \}
 
       function UnmapPluginsBindings()
         if ! empty(maparg('<leader>b', 'n')) 
@@ -145,13 +196,13 @@
           endif
       endf 
 
-    let g:which_key_map =  {}
     let g:which_key_map.f = { 'name' : '+file' }
     let g:which_key_map.f.f = { 'name' : 'file paths' }
     let g:which_key_map.g = { 'name' : '+git' }
     let g:which_key_map.w = { 'name' : 'window' }
     let g:which_key_map.s = { 'name' : 'session' }
     let g:which_key_map.y = { 'name' : 'ycm' }
+
     let g:which_key_map.h= {
      \ 'name' : '+hunk' ,
      \ 'f' : ['GitGutterFold'                   , 'Folds code that was not changed']         ,
@@ -191,46 +242,55 @@
     " nmap <silent> <Leader>t <Plug>(CommandT)
     " nmap <silent> <Leader>b <Plug>(CommandTBuffer)
     " nmap <silent> <Leader>j <Plug>(CommandTJump)
+    "
     
   " Git mappings
   "
     let g:which_key_map.g= {
-    \ 'name' : '+buffer'        ,
-    \ 'gx' : ['!svn ls'         , '[svn] check link from github' ]                   ,
-    \ 'gX' : ['!svn export'     , '[svn] download file from github link']            ,
-    \ 'gm' : ['MerginalToggle'  , 'Branch manager']                                  ,
-    \ 'go' : ['Gbrowse'         , 'Open current file in github']                             ,
-    \ 'gi' : [':e .gitignore'   , 'Open .gitignore file in current repo']                              ,
-    \ 'gA' : ['Git add .'       , 'Stage all files to commit']                               ,
-    \ 'ga' : ['Git add %'       , 'Stage current file to commit']                               ,
-    \ 'gS' : [''            , 'Stage all files, name commit and make push']                               ,
-    \ 'p' : ['bprevious'        , 'previous-buffer']                           ,
+    \ 'name' : '+git'        ,     
+    \ 'm' : [':MerginalToggle'  , 'Branch manager']                                                 ,
+    \ 'o' : [':Gbrowse'         , 'Open current file in github']                                    , 
+    \ 's' : [':Gstatus'         , 'Open current file in github']                                    , 
+    \ 'i' : [':e .gitignore'   , 'Open .gitignore file in current repo']                           ,
+    \ 'A' : [':Git add .'       , 'Stage all files']                                                ,
+    \ 'a' : [':Git add %'       , 'Stage current file to commit']                                   ,
+    \ 'c' : [':Gcommit -m ""'   , 'Make a commit']                                                  ,
+    \ 'C' : [':Git add .<cr><bar>:Gcommit -m ""' , 'Stage all files, and make commit']                 ,
+    \ 'r' : [':Gread'           , 'Replace current buffer with last commited version of file. Press "u" to undo']     ,
+    \ 'R' : [':Git reset -- %'  , 'Reset current file to previous version']                        ,
+    \ 'RR' : [':Git revert HEAD~1..HEAD'  , 'Reset current repo to previous version']              ,
+    \ 'l' : [':Git log --oneline'  , 'Show commit log']                                             ,
+    \ 'p' : [':Gpush'  , 'Make a push']                                                             ,
+    \ 'd' : [':Gdiff'  , 'Check difference with last commit']                                            ,
     \ }
+
+    " \ 'x' : ['!svn ls'         , '[svn] check link from github' ]                                  ,
+    " \ 'X' : ['!svn export'     , '[svn] download file from github link']                           ,
     
     nnoremap <leader>gx :!svn ls 
     nnoremap <leader>gX :!svn export 
-    nnoremap <leader>gm :MerginalToggle<CR>
-    nnoremap <leader>go :Gbrowse<CR>
-    nnoremap <leader>gi :e .gitignore<CR>
-    nnoremap <leader>gS :Git add .<cr><bar>:Gcommit -m ""<bar>:Gpush
-    nnoremap <leader>ga :Git add %<CR><CR>
-    nnoremap <leader>gA :Git add .<CR><CR>
-    " Reset current file to the moment from last commit
-    nnoremap <leader>gr :Gread<CR><CR>
-    nnoremap <leader>gR :Git reset -- % <CR><CR>
-    " Revert to previous commit 
-    nnoremap <leader>gRR :Git revert HEAD~1..HEAD
-    " 
-    nnoremap <leader>ge :Gedit<CR><CR>
-    nnoremap <leader>gb :Gblame<CR>
-    nnoremap <leader>gs :Gstatus<CR> <bar> :wincmd L <cr>
-    nnoremap <leader>gd :Gdiff<CR>
-    nnoremap <leader>g[ :diffget //2<CR>
-    nnoremap <leader>g] :diffget //3<CR>
-    nnoremap <leader>gL :Glog<CR>
-    nnoremap <leader>gl :Git log --oneline<CR>
-    nnoremap <leader>gc :Gcommit -m ""
-    nnoremap <leader>gp :Gpush<CR>
+
+    " nnoremap <leader>gm :MerginalToggle<CR>
+    " nnoremap <leader>go :Gbrowse<CR>
+    " nnoremap <leader>gi :e .gitignore<CR>
+    " nnoremap <leader>gS :Git add .<cr><bar>:Gcommit -m ""
+    " nnoremap <leader>ga :Git add %<CR><CR>
+    " nnoremap <leader>gA :Git add .<CR><CR>
+    " " Reset current file to the moment from last commit
+    " nnoremap <leader>gr :Gread<CR><CR>
+    " nnoremap <leader>gR :Git reset -- % <CR><CR>
+    " " Revert to previous commit 
+    " nnoremap <leader>gRR :Git revert HEAD~1..HEAD
+    " nnoremap <leader>gb :Gblame<CR>
+    " nnoremap <leader>gs :Gstatus<CR> <bar> :wincmd L <cr>
+    " nnoremap <leader>gd :Gdiff<CR>
+    " nnoremap <leader>g[ :diffget //2<CR>
+    " nnoremap <leader>g] :diffget //3<CR>
+    " nnoremap <leader>gL :Glog<CR>
+    " nnoremap <leader>gl :Git log --oneline<CR>
+    " nnoremap <leader>gc :Gcommit -m ""
+    " nnoremap <leader>gp :Gpush<CR>
+    " nnoremap <leader>ge :Gedit<CR><CR>
 
   " Ycm	
     nnoremap <leader>yi :YcmCompleter GoToDefinitionElseDeclaration<CR>
@@ -239,6 +299,7 @@
     let g:UltiSnipsExpandTrigger="<c-space>"
     let g:UltiSnipsJumpForwardTrigger="<c-l>"
     let g:UltiSnipsJumpBackwardTrigger="<c-h>"
+
   " Undotree
     nnoremap <leader>u :UndotreeToggle<cr>
 "PLUGGINS SETTINGS
@@ -250,6 +311,11 @@
     let test#strategy = "dispatch" 
   " NerdTree
     let NERDTreeShowHidden=1
+    let NERDTreeShowBookmarks=1
+    map <C-n> :NERDTreeToggle<CR>
+    " autocmd vimenter * NERDTreeToggle
+    
+
   " Ultisnips
     set runtimepath+=~/.vim/plugged/ultisnips/
     let g:UltiSnipsEditSplit="vertical"
@@ -286,12 +352,40 @@
     let g:ycm_autoclose_preview_window_after_completion=1
     let g:ycm_auto_trigger = 1
     " let g:ycm_key_invoke_completion = '<C-Space>'
+  " Javascript plugings
+  "
+  " let g:js_file_import_prompt_if_no_tag = 0
+
+  let g:syntastic_javascript_checkers = ['eslint']
+  let g:mta_use_matchparen_group = 1
+  let g:mta_filetypes = {
+      \ 'html' : 1,
+      \ 'xhtml' : 1,
+      \ 'xml' : 1,
+      \ 'jinja' : 1,
+      \ 'javascript.jsx' : 1,
+      \}
+
+
 " VIM SETTINGS
- 
-    nnoremap  <Left> <Left> 
-    nnoremap  <Right> <Right>
-    nnoremap  <Up>   <Up>   
-    nnoremap  <Down> <Down>
+" Set working directory to current file
+    " set autochdir
+    " let &path .= "," . system("git rev-parse --show-toplevel | tr -d '\\n'")
+    " autocmd BufEnter * silent! lcd &path
+    
+
+       fun! OpenGitDir()
+           """ Set working directory to close .git 
+           """ https://stackoverflow.com/questions/4596932/vim-cd-to-path-stored-in-variable
+           cd %:p:h 
+           let gitdir = system("git rev-parse --show-toplevel | tr -d '\\n'")  
+           execute 'cd'. fnameescape(gitdir)
+       endf 
+
+    " autocmd BufEnter * call OpenGitDir()
+
+    
+    set mouse=a
 
   " Custom movements for copy and pastin directly in to {[("'
     " ' one " double
@@ -306,7 +400,6 @@
     nnoremap pS ?]<cr> :silent! norm! F]di[f[di["0P <cr>
     nnoremap pc /}<cr> :silent! norm! F}di{f{di{"0P <cr>
     nnoremap pc ?[<cr> :silent! norm! F}di{f{di{"0P <cr>
-
     nnoremap p) :silent! norm! F)di(f(di("0P <cr>
     nnoremap p( :silent! norm! F)di(f(di("0P <cr>
     nnoremap p] :silent! norm! F]di[f[di["0P <cr>
@@ -316,12 +409,22 @@
 
     nnoremap dD ^d$ 
     nnoremap yY ^y$  
-  " Tabs
-    nnoremap <leader>tN :tabnew <cr>
 
+    let g:startify_bookmarks = [
+            \ '/home/migacz/Coding/www/',
+            \ '/www/gatsby-starter-lumen/',
+            \ ]
+
+" Tabs
+    nnoremap <leader>tN :tabnew <cr>
+    " nnoremap <BS> i<BS><Esc>`^
   " Move throught jumps 
-    nnoremap <C-I> <C-O>
-    nnoremap <C-O> <C-I>
+    " nnoremap <C-i> 
+    " nnoremap <C-o>
+    
+    "Sometimes tab is activating combination above so it need to be remaped.
+    " nnoremap <tab> l 
+    
   " Show what keys are pressed
     set showcmd
   " Tabstops
@@ -337,7 +440,13 @@
     set hidden
   " Reloading vim
     autocmd BufWrite ~/.vimrc nested :source $HOME/.vimrc
-    nnoremap <leader>rv :source $HOME/.vimrc <cr>
+    noremap <leader>rv :source $HOME/.vimrc <cr>
+
+    augroup myvimrc
+        au!
+        au BufWritePost .vimrc,_vimrc,vimrc,.gvimrc,_gvimrc,gvimrc so $MYVIMRC | if has('gui_running') | so $MYGVIMRC | endif
+    augroup END
+
   " Autocompletion
     set wildmenu	
   " Spell checking
@@ -350,8 +459,13 @@
     set number " line number
   " Colors/Appearance 
     syntax on
+    " indentation colors
+    set ts=4 sw=4 et
+    let g:indent_guides_start_level = 2
+    let g:indent_guides_guide_size = 1
     " set background=light
-    colorscheme  1989 "lightning
+    let g:airline_theme = 'forest_night'
+    colorscheme  forest-night "lightning
     " pop up menu colors
     highlight Pmenu ctermbg=gray 
     highlight statusline ctermfg=yellow 
@@ -363,8 +477,60 @@
     set undodir=$HOME/.vim/undo  "directory where the undo files will be stored
     endif     
   " Windows
+  " o
     let g:suckless_tabline = 0
     let g:suckless_guitablabel = 0
+
+  "Synchronise Grep with nerd tree
+  
+    map <F1> :QFix<cr>
+    map <F5> :execute "vimgrep /" . expand("<cword>") . "/j **/*.js" <Bar> cw
+    " map <F5> :execute "GGrep " . @" <cr>
+    
+   "Toggle qfix
+    command -bang -nargs=? QFix call QFixToggle(<bang>0)
+    function! QFixToggle(forced)
+      if exists("g:qfix_win") && a:forced == 0
+        cclose
+        unlet g:qfix_win
+      else
+        bot copen
+        let g:qfix_win = bufnr("$")
+      endif
+    endfunction
+
+  function! UpdateNerdTreeDir()
+
+    if (expand('%') =~# 'NERD_tree' && winnr('$') > 1)
+        exe "normal! \<c-w>\<c-w>"
+    endif
+
+    if exists("g:NERDTree") && g:NERDTree.IsOpen() 
+        exec ":NERDTreeFind" 
+    endif 
+  endfunction
+
+    fun! NerdSyncNext() 
+        :cnext
+        :call UpdateNerdTreeDir()
+        if (expand('%') =~# 'NERD_tree' && winnr('$') > 1)
+            exe "normal! \<c-w>\<c-w>"
+        endif
+
+    endf
+
+    fun! NerdSyncPrev() 
+        :cprev
+        :call UpdateNerdTreeDir()
+        if (expand('%') =~# 'NERD_tree' && winnr('$') > 1)
+            exe "normal! \<c-w>\<c-w>"
+        endif
+    endf
+
+    map <leader>l :call NerdSyncNext() <cr>
+    map <leader>h :call NerdSyncPrev() <cr>
+    map <Right> :cnext <cr>
+    map <Left> :cprev <cr>
 
     set splitbelow
     set splitright
@@ -373,7 +539,7 @@
     autocmd FileType help wincmd L
     autocmd FileType snippets wincmd L
     " Focus window
-    nnoremap <C-l> <C-W>l<C-W>_
-    nnoremap <C-h> <C-W>h<C-W>_
-    nnoremap <C-j> <C-W>j<C-W>_
-    nnoremap <C-k> <C-W>k<C-W>_
+    nnoremap <C-l> <C-W>l<C-W>
+    nnoremap <C-h> <C-W>h<C-W>
+    nnoremap <C-j> <C-W>j<C-W>
+    nnoremap <C-k> <C-W>k<C-W>
