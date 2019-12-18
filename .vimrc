@@ -12,6 +12,12 @@
   " mkdir ~/.vim/undo
 " PLUGINS
 
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
  call plug#begin('~/.vim/plugged')
 
   " Fugtive
@@ -35,7 +41,7 @@
   " Plug 'scrooloose/syntastic'
     Plug 'mtscout6/syntastic-local-eslint.vim'
     Plug 'https://github.com/justinmk/vim-dirvish.git'
-    Plug 'ludovicchabant/vim-gutentags'
+    " Plug 'ludovicchabant/vim-gutentags'
 
   " Django
     Plug 'python-mode/python-mode', { 'branch': 'develop' }
@@ -83,9 +89,9 @@
     Plug 'sainnhe/vim-color-forest-night'
   
   " Snipamte/Emmet
-    Plug 'https://github.com/SirVer/ultisnips.git'
-    Plug 'https://github.com/honza/vim-snippets'
-    Plug 'https://github.com/mattn/emmet-vim.git'
+    " Plug 'https://github.com/SirVer/ultisnips.git'
+    " Plug 'https://github.com/honza/vim-snippets'
+    " Plug 'https://github.com/mattn/emmet-vim.git'
 
   call plug#end()
 
@@ -465,7 +471,7 @@
     let g:indent_guides_guide_size = 1
     " set background=light
     let g:airline_theme = 'forest_night'
-    colorscheme  forest-night "lightning
+    colorscheme  1989 "forest-night "lightning
     " pop up menu colors
     highlight Pmenu ctermbg=gray 
     highlight statusline ctermfg=yellow 
